@@ -8,6 +8,11 @@ This project is a LINE bot that uses Google ADK (Agent SDK) and Google Gemini mo
 
 ![image](https://github.com/user-attachments/assets/2bcbd827-0047-4a3a-8645-f8075d996c10)
 
+## Demo screen
+
+<img width="369" alt="image" src="https://github.com/user-attachments/assets/92009d89-8aac-4a63-9c51-2d3c94d8264d" />
+
+
 ## Features
 
 - Text message processing using AI models (Google ADK with Google Gemini)
