@@ -1,0 +1,165 @@
+manifest:
+  version: "0.1.3"
+  schema: https://a2as.org/cert/schema
+  subject:
+    name: kkdai/linebot-adk-stock
+    source: https://github.com/kkdai/linebot-adk-stock
+    branch: main
+    commit: "a1ab830c"
+    scope: [multi_tool_agent/stock_agent.py, main.py]
+  issued:
+    by: A2AS.org
+    at: '2026-02-11T16:40:08Z'
+    url: https://a2as.org/certified/agents/kkdai/linebot-adk-stock
+  signatures:
+    digest: sha256:ZvToo14kp2qPQsT5_UAKOCA4nfeqCSl9L0NT3KV9-J0
+    key: ed25519:34sNWYjKd747FPPDHV47u_dg057Gl3WCuiivYcGJ_h0
+    sig: ed25519:WU0btrUeq5BucwOdFPSPD59BO9O_keUml7LhthhAiuXwrEXZZrqi-qcp3H21JM1kC_lz_pGM8l7Nn69dF8Y8Bg
+
+agents:
+  root_agent:
+    type: instance
+    models: [gemini-2.0-flash]
+    tools: [get_stock_price, get_price_change_percent, get_best_performing]
+    params:
+      name: stock_agent
+      description: Agent specialized in providing stock market information and analysis.
+      instruction: [You are an AI assistant specializing in stock market data., 'Users will ask for stock prices, price changes,
+          or the best performing stock from a list.', Use the provided tools to answer these questions accurately., '- For
+          current price, use `get_stock_price`.', '- For price change percentage over a period, use `get_price_change_percent`.',
+        '- For finding the best performing stock in a list over a period, use `get_best_performing`.', Always state the symbol
+          and the period clearly in your response if applicable., 'If a stock symbol is invalid or data is unavailable, inform
+          the user clearly.']
+
+models:
+  gemini-2.0-flash:
+    type: literal
+    agents: [root_agent]
+
+tools:
+  get_best_performing:
+    type: function
+    agents: [root_agent]
+    params:
+      description: |-
+        Finds the best performing stock from a list over a specified number of days.
+        Args:
+            stocks (list[str]): A list of stock symbols (e.g., ["AAPL", "MSFT"]).
+            days_ago (int): The number of days to look back for performance calculation. Must be positive.
+        Returns:
+            dict: Contains the best_stock and best_performance, or an error message.
+  get_price_change_percent:
+    type: function
+    agents: [root_agent]
+    params:
+      description: |-
+        Calculates the percentage change in a stock's price over a specified number of days.
+        Args:
+            symbol (str): The stock symbol (e.g., "AAPL").
+            days_ago (int): The number of days to look back for the price change calculation. Must be positive.
+        Returns:
+            dict: Contains the symbol, percentage change, and period, or an error message.
+  get_stock_price:
+    type: function
+    agents: [root_agent]
+    params:
+      description: |-
+        Gets the current or most recent closing price of a stock.
+        Args:
+            symbol (str): The stock symbol (e.g., "AAPL").
+        Returns:
+            dict: Contains the stock symbol and its price, or an error message.
+
+imports:
+  Agent: google.adk.agents.Agent
+  aiohttp: aiohttp
+  AiohttpAsyncHttpClient: linebot.aiohttp_async_http_client.AiohttpAsyncHttpClient
+  AsyncLineBotApi: linebot.AsyncLineBotApi
+  datetime: datetime.datetime
+  FastAPI: fastapi.FastAPI
+  get_best_performing: multi_tool_agent.stock_agent.get_best_performing
+  get_price_change_percent: multi_tool_agent.stock_agent.get_price_change_percent
+  get_stock_price: multi_tool_agent.stock_agent.get_stock_price
+  HTTPException: fastapi.HTTPException
+  InMemorySessionService: google.adk.sessions.InMemorySessionService
+  InvalidSignatureError: linebot.exceptions.InvalidSignatureError
+  MessageEvent: linebot.models.MessageEvent
+  os: os
+  Request: fastapi.Request
+  Runner: google.adk.runners.Runner
+  sys: sys
+  TextSendMessage: linebot.models.TextSendMessage
+  timedelta: datetime.timedelta
+  types: google.genai.types
+  WebhookParser: linebot.WebhookParser
+  yf: yfinance
+
+functions:
+  calculate_performance:
+    type: sync
+    module: multi_tool_agent.stock_agent
+    args: [symbol, days_ago]
+  call_agent_async:
+    type: async
+    module: main
+    args: [query, user_id]
+    params:
+      returns: str
+  get_best_performing:
+    type: sync
+    module: multi_tool_agent.stock_agent
+    args: [stocks, days_ago]
+    params:
+      returns: dict
+  get_or_create_session:
+    type: async
+    module: main
+    args: [user_id]
+  get_price_change_percent:
+    type: sync
+    module: multi_tool_agent.stock_agent
+    args: [symbol, days_ago]
+    params:
+      returns: dict
+  get_stock_price:
+    type: sync
+    module: multi_tool_agent.stock_agent
+    args: [symbol]
+    params:
+      returns: dict
+  handle_callback:
+    type: async
+    module: main
+    args: [request]
+
+variables:
+  ChannelAccessToken:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [main]
+  ChannelSecret:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [main]
+  GOOGLE_API_KEY:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [main]
+  GOOGLE_CLOUD_LOCATION:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [main]
+  GOOGLE_CLOUD_PROJECT:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [main]
+  GOOGLE_GENAI_USE_VERTEXAI:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [main]
